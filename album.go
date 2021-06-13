@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -25,8 +26,8 @@ func (a *album) currentTrack() track {
 }
 
 func (a *album) nextTrack() error {
-	a.cTrack.Close()
 	if a.cTrack != nil {
+		a.cTrack.Close()
 		a.cTrackNum++
 	}
 	if a.cTrackNum + 1 > len(a.tracks) {
@@ -38,6 +39,7 @@ func (a *album) nextTrack() error {
 	if err != nil {
 		return fmt.Errorf("error opening track %s: %v", a.currentTrack().name, err)
 	}
+	log.Printf("playing track %d", a.cTrackNum)
 	return nil
 }
 
@@ -49,7 +51,17 @@ func (a *album) Read(p []byte) (int, error) {
 	}
 	i, err := a.cTrack.Read(p)
 	if err == io.EOF {
-		return i, a.nextTrack()
+		err = a.nextTrack()
+		if err != nil {
+			return i, err
+		}
+		//fill p with bytes from next track
+		b := make([]byte, len(p))
+		j, err := a.cTrack.Read(b)
+		if err != nil {
+			return j, err
+		}
+		p = b
 	}
 	return i, nil
 }

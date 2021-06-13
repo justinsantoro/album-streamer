@@ -15,7 +15,14 @@ import (
 	"github.com/hajimehoshi/go-mp3"
 )
 
-const mp3fpath = "C:\\Users\\jzs\\classic.mp3"
+var albumToStream = album{
+	name:      "test",
+	artist:    "test",
+	tracks:    []track{{fpath:"C:\\Users\\jzs\\2_Polygondwanaland.mp3"},{fpath:"C:\\Users\\jzs\\2_Polygondwanaland.mp3"}},
+	art:       "",
+	cTrack:    nil,
+	cTrackNum: 0,
+}
 
 type readerCtx struct {
 	ctx context.Context
@@ -35,7 +42,7 @@ type flushWriter struct {
 
 func (fw flushWriter) Write(p []byte) (n int, err error) {
 	n, err = fw.w.Write(p)
-	log.Println("writing ", len(p), " bytes")
+	//log.Println("writing ", len(p), " bytes")
 	// Flush - send the buffered written data to the client
 	if f, ok := fw.w.(http.Flusher); ok {
 		f.Flush()
@@ -49,15 +56,13 @@ func streamAudio(w http.ResponseWriter, r *http.Request) {
 		f.Flush()
 	}
 
-	f, err := os.Open(mp3fpath)
+	//ctx, _ := context.WithTimeout(context.Background(), time.Second * 5)
+	_, err := io.Copy(flushWriter{w: w}, readerCtx{ctx: context.Background(), r: &albumToStream})
 	if err != nil {
-		log.Println("error opening file to stream: ", err)
+		log.Println("error streaming album: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	//need reader in between here that only sends eof at end of album not at end of files
-	ctx, _ := context.WithTimeout(context.Background(), time.Second * 5)
-	_, _ = io.Copy(flushWriter{w: w}, readerCtx{ctx: ctx, r: f})
 
 }
 
@@ -72,8 +77,9 @@ func H2CServerPrior() {
 	log.Println("Listening [0.0.0.0:1010]...")
 	for {
 		conn, err := l.Accept()
-		log.Println("error accepting connection: ", err)
-
+		if err != nil {
+			log.Println("error accepting connection: ", err)
+		}
 		server.ServeConn(conn, &http2.ServeConnOpts{
 			Handler: http.HandlerFunc(streamAudio),
 		})
@@ -95,7 +101,7 @@ func GetAudioStream(ctx context.Context) error {
 		return err
 	}
 
-	d, err := mp3.NewDecoder(readerCtx{ctx, resp.Body})
+	d, err := mp3.NewDecoder(readerCtx{context.TODO(), resp.Body})
 	if err != nil {
 		return err
 	}
