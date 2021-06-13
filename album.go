@@ -26,7 +26,9 @@ func (a *album) currentTrack() track {
 
 func (a *album) nextTrack() error {
 	a.cTrack.Close()
-	a.cTrackNum++
+	if a.cTrack != nil {
+		a.cTrackNum++
+	}
 	if a.cTrackNum + 1 > len(a.tracks) {
 		//end of album
 		return io.EOF
@@ -40,6 +42,11 @@ func (a *album) nextTrack() error {
 }
 
 func (a *album) Read(p []byte) (int, error) {
+	if a.cTrack == nil {
+		if err := a.nextTrack(); err != nil {
+			return 0, err
+		}
+	}
 	i, err := a.cTrack.Read(p)
 	if err == io.EOF {
 		return i, a.nextTrack()
