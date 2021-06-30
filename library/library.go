@@ -1,21 +1,29 @@
 package library
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/fs"
 )
 
-const webpExt = ".webp"
-
+const (
+	webpExt = ".webp"
+	pathSep = "/"
+	)
+const (
+	iartist = iota
+	ialbum
+	isong
+)
 type libkey []byte
 
-func (lk libkey) artistLen() int8 {
-	return int8(lk[len(lk)-3])
+func (lk libkey) String() string {
+	return string(lk[1:])
 }
 
-func (lk libkey) albumLen() int8 {
-	return int8(lk[len(lk)-2])
+func parseKey(k libkey, i int) string {
+	return string(bytes.Split(k[1:], []byte(pathSep))[i])
 }
 
 // Artist is the name of an artist by which
@@ -24,14 +32,14 @@ type Artist struct {
 	libkey
 }
 
-// Bytes returns the bytes of the Artist name
-func (a Artist) Bytes() []byte {
-	return a.libkey[1:a.libkey.artistLen()-1]
-}
-
 // String returns the Artist name as a string
 func (a Artist) String() string {
-	return string(a.Bytes())
+	return parseKey(a.libkey, iartist)
+}
+
+//Path returns the path to the artist
+func (a Artist) Path() string {
+	return fmt.Sprintf("/%s", a)
 }
 
 // Album is an album of music contained in the
@@ -40,18 +48,14 @@ type Album struct {
 	libkey
 }
 
-// Bytes returns the bytes of the Album name
-func (a Album) Bytes() []byte {
-	return a.libkey[1:a.libkey.albumLen()-1]
-}
-
 // String retures the string of the Album name
 func (a Album) String() string {
-	return string(a.Bytes())
+	return parseKey(a.libkey, ialbum)
 }
 
+//Path returns the path to the Album
 func (a Album) Path() string {
-	return fmt.Sprintf("/%s/%s/")
+	return fmt.Sprintf("/%s/%s/", a.Artist(), a)
 }
 
 // Artist returns the Artist which the album is
@@ -67,6 +71,7 @@ type AlbumArt struct {
 	album Album
 }
 
+//Path returns the path to the AlbumArt
 func (a AlbumArt) Path() string {
 	return a.album.Path() + a.album.String() + webpExt
 }
@@ -86,14 +91,9 @@ type Song struct {
 	libkey
 }
 
-// Bytes returns the song name as bytes
-func (s Song) Bytes() []byte {
-	return s.libkey[1:len(s.libkey) -4]
-}
-
 // String returns the song name as a string
 func (s Song) String() string {
-	return string(s.Bytes())
+	return parseKey(s.libkey, isong)
 }
 
 // Artist returns the Artist which the song is by
@@ -106,6 +106,7 @@ func (s Song) Album() Album {
 	return Album{s.libkey}
 }
 
+// Path returns the path to the Album
 func (s Song) Path() string {
 	return fmt.Sprintf("/%s/%s/%s", s.Artist(), s.Album(), s)
 }

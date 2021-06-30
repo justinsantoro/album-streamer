@@ -19,9 +19,7 @@ import (
 
 // the cache will be an in-memory badger db
 
-// key = 0artistalbumsong64
-// last two bits of the key are the length
-// of the artist name and the length of
+// key = 0artist/album/song
 // the album name respectively
 
 // 0 prefix is to leave room for using the first byte to denote
