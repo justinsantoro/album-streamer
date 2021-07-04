@@ -13,12 +13,13 @@ import (
 const (
 	webpExt = ".webp"
 	pathSep = "/"
-	)
+)
 const (
 	iartist = iota
 	ialbum
 	isong
 )
+
 type libkey string
 
 func (k libkey) String() string {
@@ -128,7 +129,7 @@ func (s Song) Reader(fsys fs.FS) (io.ReadCloser, error) {
 }
 
 type Library struct {
-	fsys fs.FS
+	fsys  fs.FS
 	store *wrappedbadger.Store
 }
 
