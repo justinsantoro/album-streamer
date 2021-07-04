@@ -1,9 +1,11 @@
 package library_test
 
 import (
-	"io/fs"
-	"testing"
+	"fmt"
 	"github.com/justinsantoro/album-streamer/library"
+	"io/fs"
+	"os"
+	"testing"
 )
 
 //use a fs.FS
@@ -32,13 +34,19 @@ import (
 //Lib.Albums(Artist) returns an artist's albums
 //Lib.Songs(Artist, Album) returns a list of songs in an album
 
-const songPath = ""
-const artPath = ""
+const songPath = "Artist1/Album1/song1.mp3"
+const artPath = "Artist1/Album1/Album1.webp"
+const testDir = "./testdata"
+//const itemlen = 2
 
-func ParseLibraryTest(t testing.T) {
+func TestLibrary(t *testing.T) {
+	var fsys fs.FS
+	//TODO: add test FS
+	fsys = os.DirFS(testDir)
+
 	var lib *library.Library
 	var err error
-	lib, err = library.NewLibrary(f fs.FS)
+	lib, err = library.NewLibrary(fsys)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -51,6 +59,10 @@ func ParseLibraryTest(t testing.T) {
 			t.Error(err)
 			t.FailNow()
 		}
+		if len(artists) != 2 {
+			t.Errorf("albums len only: %d", len(artists))
+			t.FailNow()
+		}
 	})
 
 	var albums []library.Album
@@ -58,6 +70,11 @@ func ParseLibraryTest(t testing.T) {
 		albums, err = lib.Albums(artists[0])
 		if err != nil {
 			t.Error(err)
+			t.FailNow()
+		}
+		fmt.Println(albums)
+		if len(albums) != 3 {
+			t.Errorf("albums len only: %d", len(albums))
 			t.FailNow()
 		}
 	})
@@ -71,7 +88,8 @@ func ParseLibraryTest(t testing.T) {
 
 	var songs []library.Song
 	t.Run("TestGetAlbumSongs", func(t *testing.T) {
-		songs, err = []library.Songs(artists[0], albums[0])
+		songs, err = lib.Songs(albums[0])
+		fmt.Println(songs)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()

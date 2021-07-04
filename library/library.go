@@ -3,8 +3,11 @@ package library
 import (
 	"bytes"
 	"fmt"
+	"github.com/dgraph-io/badger/v2"
+	"github.com/justinsantoro/wrappedbadger"
 	"io"
 	"io/fs"
+	"path/filepath"
 )
 
 const (
@@ -26,6 +29,10 @@ func parseKey(k libkey, i int) string {
 	return string(bytes.Split(k[1:], []byte(pathSep))[i])
 }
 
+func newLibKey(path string) libkey {
+	return append([]byte{0}, []byte(path)...)
+}
+
 // Artist is the name of an artist by which
 // Albums are contained in the library
 type Artist struct {
@@ -34,12 +41,18 @@ type Artist struct {
 
 // String returns the Artist name as a string
 func (a Artist) String() string {
+	if a.libkey == nil {
+		return ""
+	}
 	return parseKey(a.libkey, iartist)
 }
 
 //Path returns the path to the artist
 func (a Artist) Path() string {
-	return fmt.Sprintf("/%s", a)
+	if a.libkey == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s/", a)
 }
 
 // Album is an album of music contained in the
@@ -50,12 +63,18 @@ type Album struct {
 
 // String retures the string of the Album name
 func (a Album) String() string {
+	if a.libkey == nil {
+		return ""
+	}
 	return parseKey(a.libkey, ialbum)
 }
 
 //Path returns the path to the Album
 func (a Album) Path() string {
-	return fmt.Sprintf("/%s/%s/", a.Artist(), a)
+	if a.libkey == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s/%s/", a.Artist(), a)
 }
 
 // Artist returns the Artist which the album is
@@ -108,10 +127,106 @@ func (s Song) Album() Album {
 
 // Path returns the path to the Album
 func (s Song) Path() string {
-	return fmt.Sprintf("/%s/%s/%s", s.Artist(), s.Album(), s)
+	return fmt.Sprintf("%s/%s/%s", s.Artist(), s.Album(), s)
 }
 
 // Reader returns a ReadCloser for the song file
 func (s Song) Reader(fsys fs.FS) (io.ReadCloser, error) {
 	return fsys.Open(s.Path())
+}
+
+type Library struct {
+	fsys fs.FS
+	store *wrappedbadger.Store
+}
+
+func (l *Library) parse() error {
+	return fs.WalkDir(l.fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			if filepath.Ext(path) != webpExt {
+				fmt.Println(path)
+				return l.store.Set(newLibKey(path), nil)
+			}
+		}
+		return nil
+	})
+}
+
+func NewLibrary(fsys fs.FS) (*Library, error) {
+	var lib Library
+	lib.fsys = fsys
+
+	opts := badger.DefaultOptions("")
+	opts.Logger = nil
+	opts.InMemory = true
+
+	db, err := badger.Open(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	lib.store = &wrappedbadger.Store{db}
+	if err = lib.parse(); err != nil {
+		return nil, err
+	}
+	return &lib, nil
+}
+
+func (l Library) Artists() ([]Artist, error) {
+	prevArtist := Artist{}
+	artists := make([]Artist, 0)
+
+	err := l.store.IterateKeys(newLibKey(""), func(k []byte) error {
+		artist := Artist{k}
+		if artist.String() != prevArtist.String() {
+			prevArtist = artist
+			artists = append(artists, artist)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return artists, nil
+}
+
+func (l Library) Albums(artist Artist) ([]Album, error) {
+	prevAlbum := ""
+	albums := make([]Album, 0)
+	fmt.Println(artist.Path())
+	err := l.store.IterateKeys(newLibKey(artist.Path()), func(k []byte) error {
+		album := Album{k}
+		fmt.Println("album key: " + album.libkey.String())
+		fmt.Println("album: " + album.String())
+		fmt.Println("prev album: " + prevAlbum)
+		if album.String() != prevAlbum {
+			fmt.Println("set prev album: from " + prevAlbum)
+			prevAlbum = album.String()
+			fmt.Println("set prev album: to " + prevAlbum)
+			albums = append(albums, album)
+		}
+		fmt.Println("end check album")
+		fmt.Println()
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return albums, nil
+}
+
+func (l Library) Songs(album Album) ([]Song, error) {
+	songs := make([]Song, 0)
+	fmt.Println(album.Path())
+	err := l.store.IterateKeys(newLibKey(album.Path()), func(k []byte) error {
+		songs = append(songs, Song{k})
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return songs, nil
 }
