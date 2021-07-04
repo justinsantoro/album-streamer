@@ -73,14 +73,14 @@ func TestLibrary(t *testing.T) {
 			t.FailNow()
 		}
 		fmt.Println(albums)
-		if len(albums) != 3 {
+		if len(albums) != 2 {
 			t.Errorf("albums len only: %d", len(albums))
 			t.FailNow()
 		}
 	})
 
 	var path string
-	t.Run("TestGetAlbumPath", func(t *testing.T) {
+	t.Run("TestGetAlbumArtPath", func(t *testing.T) {
 		if path = albums[0].Art().Path(); path != artPath {
 			t.Errorf("library gave bad artPath: %s - Expected %s", path, artPath)
 		}
