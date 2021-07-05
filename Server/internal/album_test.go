@@ -2,9 +2,10 @@ package internal_test
 
 import (
 	"bytes"
-	"io"
-	"io/ioutil"
+	"fmt"
 	"github.com/justinsantoro/album-streamer/Server/internal"
+	"io"
+	"strings"
 	"testing"
 )
 
@@ -13,10 +14,8 @@ import (
 //get album reader
 
 //streams multiple files via one reader
-type stringReadCloser string
-
-func (src stringReadCloser) Read(p []byte) (int, error) {
-	return 0, nil
+type stringReadCloser struct {
+	io.Reader
 }
 
 func (src stringReadCloser) Close() error {
@@ -30,32 +29,51 @@ var a = internal.Album{
 		internal.Track{
 			Name: "American Idiot",
 			ReaderFunc: func () io.ReadCloser {
-				return stringReadCloser("americanidiot")
+				return stringReadCloser{strings.NewReader("americanidiot")}
 			},
 		},
 		internal.Track{
 			Name: "Jesus Of Suburbia",
 			ReaderFunc: func () io.ReadCloser {
-				return stringReadCloser("jesusofsuburbia")
+				return stringReadCloser{strings.NewReader("jesusofsuburbia")}
 			},
 		},
 		internal.Track{
 			Name: "Holiday",
 			ReaderFunc: func() io.ReadCloser {
-				return stringReadCloser("holidaysong")
+				return stringReadCloser{strings.NewReader("holidaysong")}
 			},
 		},
 	},
 }
 
-var songbytes = append([]byte("americanidiot"), append([]byte("jesusofsuburbia"), []byte("holidaysong")...)...)
+var songbytes = append([]byte("americanidiot"), append([]byte("esusofsuburbia"), []byte("olidaysong")...)...)
 
 func TestAlbum_Read(t *testing.T) {
-	b, err := ioutil.ReadAll(a)
-	if err != nil {
-		t.Errorf("error reading ablum: %v", err)
-		t.FailNow()
+	b := make([]byte, 0)
+	for {
+		p := make([]byte, 1)
+		i, err := a.Read(p)
+		fmt.Println(p)
+		println(string(p) + " " + fmt.Sprint(i) + " " + fmt.Sprint(len(p)))
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			t.Error(err)
+			t.FailNow()
+		}
+		if i > 0 {
+			b = append(b, p[0])
+		}
+		//println(string(b))
 	}
+
+	//b, err := ioutil.ReadAll(&a)
+	//if err != nil {
+	//	t.Errorf("error reading ablum: %v", err)
+	//	t.FailNow()
+	//}
 	if !bytes.Equal(b, songbytes) {
 		t.Errorf("album read returned unexpected bytes: %s - expected %s", string(b), string(songbytes))
 		t.FailNow()

@@ -3,25 +3,42 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/hajimehoshi/oto"
+	"github.com/justinsantoro/album-streamer/Server/internal"
 	"golang.org/x/net/http2"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"github.com/hajimehoshi/oto"
 	"time"
 
 	"github.com/hajimehoshi/go-mp3"
 )
 
-var albumToStream = album{
-	name:      "test",
-	artist:    "test",
-	tracks:    []track{{fpath:"C:\\Users\\jzs\\2_Polygondwanaland.mp3"},{fpath:"C:\\Users\\jzs\\2_Polygondwanaland.mp3"}},
-	art:       "",
-	cTrack:    nil,
-	cTrackNum: 0,
+var albumToStream = internal.Album{
+	Name:      "test",
+	Artist:    "test",
+	Tracks:    []internal.Track{
+		{
+			ReaderFunc: func() io.ReadCloser {
+				r, err := os.Open("C:\\Users\\jzs\\2_Polygondwanaland.mp3")
+				if err != nil {
+					panic(err)
+				}
+				return r
+			},
+		},
+		{
+			ReaderFunc: func() io.ReadCloser {
+				r, err := os.Open("C:\\Users\\jzs\\1_Crumbling_Castle.mp3")
+				if err != nil {
+					panic(err)
+				}
+				return r
+			},
+		},
+	},
 }
 
 type readerCtx struct {
