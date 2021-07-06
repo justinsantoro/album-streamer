@@ -32,6 +32,7 @@ type Album struct {
 	Art io.ReadCloser
 	cTrack *Track
 	cTrackNum int
+
 }
 
 func (a *Album) currentTrack() *Track {
@@ -64,15 +65,7 @@ func (a *Album) Read(p []byte) (int, error) {
 		if err != nil {
 			return i, err
 		}
-		//fill p with bytes from next track
-		b := make([]byte, 4)
-		_, err = a.cTrack.Read(b)
-		if err != nil {
-			return i, err
-		}
-		//println(string(b))
-		//p = b
-		//fmt.Println(p)
+		return 0, nil
 	}
 	//println(string(p) + " " + fmt.Sprint(i))
 	return i, nil

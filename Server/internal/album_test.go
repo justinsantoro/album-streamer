@@ -2,9 +2,9 @@ package internal_test
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/justinsantoro/album-streamer/Server/internal"
 	"io"
+	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -47,33 +47,14 @@ var a = internal.Album{
 	},
 }
 
-var songbytes = append([]byte("americanidiot"), append([]byte("esusofsuburbia"), []byte("olidaysong")...)...)
+var songbytes = append([]byte("americanidiot"), append([]byte("jesusofsuburbia"), []byte("holidaysong")...)...)
 
 func TestAlbum_Read(t *testing.T) {
-	b := make([]byte, 0)
-	for {
-		p := make([]byte, 1)
-		i, err := a.Read(p)
-		fmt.Println(p)
-		println(string(p) + " " + fmt.Sprint(i) + " " + fmt.Sprint(len(p)))
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			t.Error(err)
-			t.FailNow()
-		}
-		if i > 0 {
-			b = append(b, p[0])
-		}
-		//println(string(b))
+	b, err := ioutil.ReadAll(&a)
+	if err != nil {
+		t.Errorf("error reading ablum: %v", err)
+		t.FailNow()
 	}
-
-	//b, err := ioutil.ReadAll(&a)
-	//if err != nil {
-	//	t.Errorf("error reading ablum: %v", err)
-	//	t.FailNow()
-	//}
 	if !bytes.Equal(b, songbytes) {
 		t.Errorf("album read returned unexpected bytes: %s - expected %s", string(b), string(songbytes))
 		t.FailNow()
