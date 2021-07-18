@@ -1,4 +1,4 @@
-module github.com/justinsantoro/album-streamer/library
+module github.com/justinsantoro/album-streamer/streamer/library
 
 go 1.16
 

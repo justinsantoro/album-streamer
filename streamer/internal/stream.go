@@ -86,6 +86,7 @@ func (s *Stream) start() error {
 		if err != nil {
 			return err
 		}
+		s.cfunc()
 		return nil
 	})
 	eg.Go(func() error {

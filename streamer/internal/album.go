@@ -8,12 +8,14 @@ import (
 type Track struct {
 	Name string
 	r io.ReadCloser
-	ReaderFunc func() io.ReadCloser
+	ReaderFunc func() (io.ReadCloser, error)
 }
 
 func (t *Track) Read(p []byte) (int, error) {
+	var err error
 	if t.r == nil {
-		t.r = t.ReaderFunc()
+		t.r, err = t.ReaderFunc()
+		return 0, err
 	}
 	return t.r.Read(p)
 }
@@ -29,10 +31,9 @@ type Album struct {
 	Name string
 	Artist string
 	Tracks []Track
-	Art io.ReadCloser
 	cTrack *Track
 	cTrackNum int
-
+	ArtReader func() (io.ReadCloser, error)
 }
 
 func (a *Album) currentTrack() *Track {

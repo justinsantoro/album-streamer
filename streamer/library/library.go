@@ -40,13 +40,11 @@ func libkeyFromBytes(k []byte) libkey {
 
 // Artist is the name of an artist by which
 // Albums are contained in the library
-type Artist struct {
-	libkey
-}
+type Artist libkey
 
 // String returns the Artist name as a string
 func (a Artist) String() string {
-	return parseKey(a.libkey, iartist)
+	return parseKey(libkey(a), iartist)
 }
 
 //Path returns the path to the artist
@@ -56,13 +54,11 @@ func (a Artist) Path() string {
 
 // Album is an album of music contained in the
 // library
-type Album struct {
-	libkey
-}
+type Album libkey
 
 // String retures the string of the Album name
 func (a Album) String() string {
-	return parseKey(a.libkey, ialbum)
+	return parseKey(libkey(a), ialbum)
 }
 
 //Path returns the path to the Album
@@ -73,7 +69,7 @@ func (a Album) Path() string {
 // Artist returns the Artist which the album is
 // by
 func (a Album) Artist() Artist {
-	return Artist{a.libkey}
+	return Artist(a)
 }
 
 // AlbumArt is the artwork associated with an
@@ -99,23 +95,21 @@ func (a Album) Art() AlbumArt {
 }
 
 // Song is a song contained in the library
-type Song struct {
-	libkey
-}
+type Song libkey
 
 // String returns the song name as a string
 func (s Song) String() string {
-	return parseKey(s.libkey, isong)
+	return parseKey(libkey(s), isong)
 }
 
 // Artist returns the Artist which the song is by
 func (s Song) Artist() Artist {
-	return Artist{s.libkey}
+	return Artist(s)
 }
 
 // Album returns the Album the song is on
 func (s Song) Album() Album {
-	return Album{s.libkey}
+	return Album(s)
 }
 
 // Path returns the path to the Album
@@ -135,6 +129,7 @@ type Library struct {
 
 func (l *Library) parse() error {
 	return fs.WalkDir(l.fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		fmt.Println(path)
 		if err != nil {
 			return err
 		}
@@ -169,11 +164,11 @@ func NewLibrary(fsys fs.FS) (*Library, error) {
 }
 
 func (l Library) Artists() ([]Artist, error) {
-	prevArtist := Artist{}
+	var prevArtist Artist
 	artists := make([]Artist, 0)
 
 	err := l.store.IterateKeys(libkey("").Bytes(), func(k []byte) error {
-		artist := Artist{libkeyFromBytes(k)}
+		artist := Artist(libkeyFromBytes(k))
 		if artist.String() != prevArtist.String() {
 			prevArtist = artist
 			artists = append(artists, artist)
@@ -191,8 +186,8 @@ func (l Library) Albums(artist Artist) ([]Album, error) {
 	albums := make([]Album, 0)
 	fmt.Println(artist.Path())
 	err := l.store.IterateKeys(libkey(artist.Path()).Bytes(), func(k []byte) error {
-		album := Album{libkeyFromBytes(k)}
-		fmt.Println("album key: " + album.libkey.String())
+		album := Album(libkeyFromBytes(k))
+		fmt.Println("album key: " + libkey(album).String())
 		fmt.Println("album: " + album.String())
 		fmt.Println("prev album: " + prevAlbum)
 		if album.String() != prevAlbum {
@@ -215,7 +210,7 @@ func (l Library) Songs(album Album) ([]Song, error) {
 	songs := make([]Song, 0)
 	fmt.Println(album.Path())
 	err := l.store.IterateKeys(libkey(album.Path()).Bytes(), func(k []byte) error {
-		songs = append(songs, Song{libkeyFromBytes(k)})
+		songs = append(songs, Song(libkeyFromBytes(k)))
 		return nil
 	})
 	if err != nil {
@@ -223,3 +218,10 @@ func (l Library) Songs(album Album) ([]Song, error) {
 	}
 	return songs, nil
 }
+ func (l Library) Album(path string) (Album, error) {
+ 	b, err := l.store.Get([]byte(path))
+ 	if err != nil {
+ 		return "", err
+	}
+	return Album(libkey(b)), nil
+ }

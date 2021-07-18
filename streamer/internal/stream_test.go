@@ -2,7 +2,7 @@ package internal_test
 
 import (
 	"context"
-	"github.com/justinsantoro/album-streamer/Server/internal"
+	"github.com/justinsantoro/album-streamer/streamer/internal"
 	"github.com/justinsantoro/album-streamer/h2c"
 	"io"
 	"net/http"

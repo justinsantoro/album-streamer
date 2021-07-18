@@ -2,7 +2,7 @@ package internal_test
 
 import (
 	"bytes"
-	"github.com/justinsantoro/album-streamer/Server/internal"
+	"github.com/justinsantoro/album-streamer/streamer/internal"
 	"io"
 	"io/ioutil"
 	"strings"

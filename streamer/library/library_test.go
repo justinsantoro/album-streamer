@@ -2,7 +2,7 @@ package library_test
 
 import (
 	"fmt"
-	"github.com/justinsantoro/album-streamer/library"
+	"github.com/justinsantoro/album-streamer/streamer/library"
 	"io/fs"
 	"os"
 	"testing"
