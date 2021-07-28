@@ -23,7 +23,7 @@ func NewStreamer(fsys fs.FS) (*Streamer, error) {
 }
 
 func (s *Streamer) Stream(ctx context.Context, artist string, album string, to string) (*internal.Stream, error) {
-	a := library.Album(fmt.Sprint("/", artist, "/", album))
+	a := library.Album(fmt.Sprint(artist, "/", album))
 	sngs, err := s.Library.Songs(a)
 	if err != nil {
 		return nil, fmt.Errorf("error getting album %s's songs: %v", a, err)

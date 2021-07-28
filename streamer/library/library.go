@@ -206,7 +206,7 @@ func (l Library) Albums(artist Artist) ([]Album, error) {
 	return albums, nil
 }
 
-func (l Library) Songs(album Album) ([]Song, error) {
+func (l *Library) Songs(album Album) ([]Song, error) {
 	songs := make([]Song, 0)
 	fmt.Println(album.Path())
 	err := l.store.IterateKeys(libkey(album.Path()).Bytes(), func(k []byte) error {

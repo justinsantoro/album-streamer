@@ -66,7 +66,7 @@ func NewStream(ctx context.Context, album *Album, to string) (*Stream, error) {
 func (s *Stream) start() error {
 	pr, pw := io.Pipe()
 
-	req, err := http.NewRequestWithContext(s.ctx, http.MethodPut, s.to, io.NopCloser(pr))
+	req, err := http.NewRequest(http.MethodPut, s.to, io.NopCloser(pr))
 	if err != nil {
 		return err
 	}
@@ -79,18 +79,18 @@ func (s *Stream) start() error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("%s reponded with unssuccessful status code: %d", s.to, resp.StatusCode)
 	}
-
 	eg := errgroup.Group{}
 	eg.Go(func() error {
+		defer pw.Close()
 		_, err := io.Copy(pw, readerCtx{ctx: s.ctx, r: s.a})
 		if err != nil {
 			return err
 		}
-		s.cfunc()
 		return nil
 	})
 	eg.Go(func() error {
 		//TODO: do something with the incoming data stream?
+		defer s.cfunc()
 		_, err := io.Copy(ioutil.Discard, resp.Body)
 		if err != nil && err != context.Canceled {
 			return err
