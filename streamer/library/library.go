@@ -119,7 +119,11 @@ func (s Song) Path() string {
 
 // Reader returns a ReadCloser for the song file
 func (s Song) Reader(fsys fs.FS) (io.ReadCloser, error) {
-	return fsys.Open(s.Path())
+	f, err := fsys.Open(s.Path())
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
 }
 
 type Library struct {

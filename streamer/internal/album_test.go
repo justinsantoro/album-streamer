@@ -28,20 +28,20 @@ var a = internal.Album{
 	Tracks: []internal.Track{
 		internal.Track{
 			Name: "American Idiot",
-			ReaderFunc: func () io.ReadCloser {
-				return stringReadCloser{strings.NewReader("americanidiot")}
+			ReaderFunc: func () (io.ReadCloser, error) {
+				return stringReadCloser{strings.NewReader("americanidiot")}, nil
 			},
 		},
 		internal.Track{
 			Name: "Jesus Of Suburbia",
-			ReaderFunc: func () io.ReadCloser {
-				return stringReadCloser{strings.NewReader("jesusofsuburbia")}
+			ReaderFunc: func () (io.ReadCloser, error) {
+				return stringReadCloser{strings.NewReader("jesusofsuburbia")}, nil
 			},
 		},
 		internal.Track{
 			Name: "Holiday",
-			ReaderFunc: func() io.ReadCloser {
-				return stringReadCloser{strings.NewReader("holidaysong")}
+			ReaderFunc: func() (io.ReadCloser, error) {
+				return stringReadCloser{strings.NewReader("holidaysong")}, nil
 			},
 		},
 	},

@@ -23,12 +23,12 @@ var album = internal.Album{
 	Tracks: []internal.Track{
 		internal.Track{
 			Name:       "test track",
-			ReaderFunc: func() io.ReadCloser {
-				return io.NopCloser(new(ForeverReader))
+			ReaderFunc: func() (io.ReadCloser, error) {
+				return io.NopCloser(new(ForeverReader)), nil
 			},
 		},
 	},
-	Art:    nil,
+	ArtReader:    nil,
 }
 
 func TestServer_Stream(t *testing.T) {
