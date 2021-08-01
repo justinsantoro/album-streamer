@@ -15,6 +15,11 @@ func (t *Track) Read(p []byte) (int, error) {
 	var err error
 	if t.r == nil {
 		t.r, err = t.ReaderFunc()
+		if err != nil {
+			return 0, err
+		}
+		s := source{reader:t.r}
+		err = s.skipTags()
 		return 0, err
 	}
 	return t.r.Read(p)
