@@ -17,7 +17,7 @@ type testreader struct {
 
 type testfs struct {
 	fs.FS
-	t testing.T
+	t  testing.T
 	ri int
 }
 
@@ -58,7 +58,7 @@ func TestIntegration(t *testing.T) {
 	})
 
 	t.Run("StreamAlbum", func(t *testing.T) {
-		strm, err := s.Stream(context.Background(), "Artist1", "Album1", "http://" + paddr)
+		strm, err := s.Stream(context.Background(), "Artist1", "Album1", "http://"+paddr)
 		if err != nil {
 			t.Error(err)
 		}

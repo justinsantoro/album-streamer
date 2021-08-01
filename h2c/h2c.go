@@ -12,7 +12,7 @@ import (
 type Server struct {
 	http2.Server
 	BaseConfig *http.Server
-	BaseCtx context.Context
+	BaseCtx    context.Context
 }
 
 func (s *Server) ListenAndServe() error {
@@ -45,12 +45,12 @@ func (s *Server) ListenAndServe() error {
 //
 // ListenAndServe always returns a non-nil error.
 func ListenAndServe(addr string, handler http.Handler) error {
-	server := &Server{http2.Server{}, &http.Server{Addr:addr, Handler:handler}, nil}
+	server := &Server{http2.Server{}, &http.Server{Addr: addr, Handler: handler}, nil}
 	return server.ListenAndServe()
 }
 
 func ListenAndServeWithContext(ctx context.Context, addr string, handler http.Handler) error {
-	server := &Server{http2.Server{}, &http.Server{Addr:addr, Handler:handler}, ctx}
+	server := &Server{http2.Server{}, &http.Server{Addr: addr, Handler: handler}, ctx}
 	return server.ListenAndServe()
 }
 

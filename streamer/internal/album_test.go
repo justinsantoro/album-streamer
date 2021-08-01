@@ -23,18 +23,18 @@ func (src stringReadCloser) Close() error {
 }
 
 var a = internal.Album{
-	Name: "American Idiot",
+	Name:   "American Idiot",
 	Artist: "Green Day",
 	Tracks: []internal.Track{
 		internal.Track{
 			Name: "American Idiot",
-			ReaderFunc: func () (io.ReadCloser, error) {
+			ReaderFunc: func() (io.ReadCloser, error) {
 				return stringReadCloser{strings.NewReader("americanidiot")}, nil
 			},
 		},
 		internal.Track{
 			Name: "Jesus Of Suburbia",
-			ReaderFunc: func () (io.ReadCloser, error) {
+			ReaderFunc: func() (io.ReadCloser, error) {
 				return stringReadCloser{strings.NewReader("jesusofsuburbia")}, nil
 			},
 		},

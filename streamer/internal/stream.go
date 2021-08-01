@@ -10,7 +10,6 @@ import (
 	"net/http"
 )
 
-
 type readerCtx struct {
 	ctx context.Context
 	r   io.Reader
@@ -38,12 +37,12 @@ func (fw flushWriter) Write(p []byte) (n int, err error) {
 }
 
 type Stream struct {
-	c http.Client
-	ctx context.Context
+	c     http.Client
+	ctx   context.Context
 	cfunc context.CancelFunc
-	a *Album
-	to string
-	w func() error
+	a     *Album
+	to    string
+	w     func() error
 }
 
 //NewStream returns starns and returns an new stream to the given url
@@ -51,13 +50,13 @@ func NewStream(ctx context.Context, album *Album, to string) (*Stream, error) {
 	var strm Stream
 	ctx, cfunc := context.WithCancel(ctx)
 	strm = Stream{
-		c:   h2c.DefaultClient,
-		ctx: ctx,
+		c:     h2c.DefaultClient,
+		ctx:   ctx,
 		cfunc: cfunc,
-		a:   album,
-		to: to,
+		a:     album,
+		to:    to,
 	}
-	if err := strm.start() ;err != nil {
+	if err := strm.start(); err != nil {
 		return nil, err
 	}
 	return &strm, nil
@@ -104,4 +103,3 @@ func (s *Stream) start() error {
 func (s *Stream) Wait() error {
 	return s.w()
 }
-

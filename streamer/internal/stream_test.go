@@ -2,8 +2,8 @@ package internal_test
 
 import (
 	"context"
-	"github.com/justinsantoro/album-streamer/streamer/internal"
 	"github.com/justinsantoro/album-streamer/h2c"
+	"github.com/justinsantoro/album-streamer/streamer/internal"
 	"io"
 	"net/http"
 	"os"
@@ -22,13 +22,13 @@ var album = internal.Album{
 	Artist: "test artist",
 	Tracks: []internal.Track{
 		internal.Track{
-			Name:       "test track",
+			Name: "test track",
 			ReaderFunc: func() (io.ReadCloser, error) {
 				return io.NopCloser(new(ForeverReader)), nil
 			},
 		},
 	},
-	ArtReader:    nil,
+	ArtReader: nil,
 }
 
 func TestServer_Stream(t *testing.T) {
@@ -52,7 +52,7 @@ func TestServer_Stream(t *testing.T) {
 	}
 
 	ch := make(chan error, 0)
-	go func () {
+	go func() {
 		ch <- strm.Wait()
 	}()
 
@@ -69,8 +69,3 @@ func TestServer_Stream(t *testing.T) {
 		}
 	}
 }
-
-
-
-
-

@@ -6,8 +6,8 @@ import (
 )
 
 type Track struct {
-	Name string
-	r io.ReadCloser
+	Name       string
+	r          io.ReadCloser
 	ReaderFunc func() (io.ReadCloser, error)
 }
 
@@ -18,7 +18,7 @@ func (t *Track) Read(p []byte) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		s := source{reader:t.r}
+		s := source{reader: t.r}
 		err = s.skipTags()
 		return 0, err
 	}
@@ -33,10 +33,10 @@ func (t *Track) Close() error {
 }
 
 type Album struct {
-	Name string
-	Artist string
-	Tracks []Track
-	cTrack *Track
+	Name      string
+	Artist    string
+	Tracks    []Track
+	cTrack    *Track
 	cTrackNum int
 	ArtReader func() (io.ReadCloser, error)
 }
@@ -50,7 +50,7 @@ func (a *Album) nextTrack() error {
 		a.cTrack.Close()
 		a.cTrackNum++
 	}
-	if a.cTrackNum + 1 > len(a.Tracks) {
+	if a.cTrackNum+1 > len(a.Tracks) {
 		//end of album
 		return io.EOF
 	}

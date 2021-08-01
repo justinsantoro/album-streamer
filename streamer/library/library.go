@@ -222,10 +222,10 @@ func (l *Library) Songs(album Album) ([]Song, error) {
 	}
 	return songs, nil
 }
- func (l Library) Album(path string) (Album, error) {
- 	b, err := l.store.Get([]byte(path))
- 	if err != nil {
- 		return "", err
+func (l Library) Album(path string) (Album, error) {
+	b, err := l.store.Get([]byte(path))
+	if err != nil {
+		return "", err
 	}
 	return Album(libkey(b)), nil
- }
+}

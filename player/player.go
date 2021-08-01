@@ -36,7 +36,6 @@ var Handlef http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 
-
 	p := c.NewPlayer()
 	defer p.Close()
 
