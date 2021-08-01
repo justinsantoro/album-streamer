@@ -30,10 +30,11 @@ func (s *Streamer) Stream(ctx context.Context, artist string, album string, to s
 	}
 	trks := make([]internal.Track, 0)
 	for _, trk := range sngs {
+		t := trk
 		trks = append(trks, internal.Track{
-			Name: trk.String(),
+			Name: t.String(),
 			ReaderFunc: func() (io.ReadCloser, error) {
-				return trk.Reader(s.fsys)
+				return t.Reader(s.fsys)
 			},
 		})
 	}
