@@ -42,10 +42,9 @@ func TestServer_Stream(t *testing.T) {
 
 	go h2c.ListenAndServe("0.0.0.0:8080", nil)
 
-	var strm *internal.Stream
 	var err error
 	ctx, cfunc := context.WithCancel(context.Background())
-	strm, err = internal.NewStream(ctx, &album, "http://0.0.0.0:8080")
+	wait, err := internal.NewStream(ctx, &album, "http://0.0.0.0:8080")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -53,7 +52,7 @@ func TestServer_Stream(t *testing.T) {
 
 	ch := make(chan error, 0)
 	go func() {
-		ch <- strm.Wait()
+		ch <- wait()
 	}()
 
 	cfunc()

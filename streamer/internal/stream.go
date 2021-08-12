@@ -46,7 +46,7 @@ type Stream struct {
 }
 
 //NewStream returns starns and returns an new stream to the given url
-func NewStream(ctx context.Context, album *Album, to string) (*Stream, error) {
+func NewStream(ctx context.Context, album *Album, to string) (func() error, error) {
 	var strm Stream
 	ctx, cfunc := context.WithCancel(ctx)
 	strm = Stream{
@@ -59,7 +59,7 @@ func NewStream(ctx context.Context, album *Album, to string) (*Stream, error) {
 	if err := strm.start(); err != nil {
 		return nil, err
 	}
-	return &strm, nil
+	return strm.Wait, nil
 }
 
 func (s *Stream) start() error {
