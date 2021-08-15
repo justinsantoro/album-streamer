@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const expectedStream = "thisissong1thisissong2"
+const expectedStream = "sissong1sissong2"
 const testDir = "./library/testdata"
 
 func TestStream(t *testing.T) {
@@ -41,14 +41,13 @@ func TestStream(t *testing.T) {
 		t.FailNow()
 	}
 
-	strm, err := strmr.Stream(context.Background(), "Artist1", "Album1", "http://0.0.0.0:8080")
+	wait, err := strmr.Stream(context.Background(), "Artist1", "Album1", "http://0.0.0.0:8080")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-
 	go func() {
-		ch <- strm.Wait()
+		ch <- wait()
 	}()
 
 	select {
