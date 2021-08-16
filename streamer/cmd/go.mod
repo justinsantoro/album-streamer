@@ -10,4 +10,4 @@ replace github.com/justinsantoro/album-streamer/h2c => ../../h2c
 
 go 1.16
 
-require github.com/justinsantoro/album-streamer/streamer v0.0.0-00010101000000-000000000000
+require github.com/justinsantoro/album-streamer/streamer v0.0.0-20210816214815-599c40d166a5
